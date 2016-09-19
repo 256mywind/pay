@@ -1,0 +1,22 @@
+{
+  "name": "256mywind/pay",
+  "description": "Yii2 sms extension",
+  "keywords": ["yii2", "extension", "sms", "plugin"],
+  "homepage": "https://github.com/256mywind/pay.git",
+  "type": "yii2-extension",
+  "license": "BSD 3-Clause",
+  "authors": [
+    {
+      "name": "yangdong",
+      "email": "27282480@qq.com"
+    }
+  ],
+  "require": {
+    "yiisoft/yii2": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "yangdong\\\": ""
+    }
+  }
+}

@@ -1,6 +1,6 @@
 <?php
 
-namespace Common\Pay;
+namespace yandong\pay;
 
 /**
  * 支付类
