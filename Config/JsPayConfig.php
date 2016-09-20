@@ -3,7 +3,7 @@
 * 	配置账号信息
 */
 
-class WxPayConfig
+class JsPayConfig
 {
 	//=======【基本信息设置】=====================================
 	//
@@ -22,10 +22,10 @@ class WxPayConfig
 	 * 获取地址：https://mp.weixin.qq.com/advanced/advanced?action=dev&t=advanced/dev&token=2005451881&lang=zh_CN
 	 * @var string
 	 */
-	const APPID = 'wxc199b9409ce8723b';
-	const MCHID = '1383361502';
-	const KEY = 'shuaixiubang12345678shuaixiubang';
-	const APPSECRET = '55bf8672641a0fe73019199b79d7ca88';
+	const APPID = '11';
+	const MCHID = '11';
+	const KEY = '11';
+	const APPSECRET = '11';
 	
 	//=======【证书路径设置】=====================================
 	/**
@@ -56,4 +56,8 @@ class WxPayConfig
 	 * @var int
 	 */
 	const REPORT_LEVENL = 1;
+	
+	//=======【curl超时设置】===================================
+	//本例程通过curl使用HTTP POST方法，此处可修改其超时时间，默认为30秒
+	const CURL_TIMEOUT  = 30;
 }

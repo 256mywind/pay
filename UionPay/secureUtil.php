@@ -1,6 +1,6 @@
 <?php
-require_once COMMON_PATH . 'Pay/AppUpay/common.php';
-require_once COMMON_PATH . 'Pay/AppUpay/PublicEncrypte.php';
+require_once 'common.php';
+require_once 'PublicEncrypte.php';
 /**
  * 签名
  *
@@ -15,7 +15,7 @@ function sign(&$params) {
 
     $params_sha1x16 = sha1 ( $params_str, FALSE );
     // 签名证书路径
-    $cert_path = C('upay.SDK_SIGN_CERT_PATH');
+    $cert_path = UnPayConfig::SDK_SIGN_CERT_PATH;
     $private_key = getPrivateKey ( $cert_path );
     // 签名
     $sign_falg = openssl_sign ( $params_sha1x16, $signature, $private_key, OPENSSL_ALGO_SHA1 );
@@ -53,7 +53,7 @@ function verify($params) {
  */
 function getPulbicKeyByCertId($certId) {
     // 证书目录
-    $cert_dir = C('upay.SDK_VERIFY_CERT_DIR');
+    $cert_dir = UnPayConfig::SDK_VERIFY_CERT_DIR;
     $handle = opendir ( $cert_dir );
     if ($handle) {
         while ( $file = readdir ( $handle ) ) {
@@ -81,7 +81,7 @@ function getPulbicKeyByCertId($certId) {
 function getCertId($cert_path) {
     $pkcs12certdata = file_get_contents ( $cert_path );
 
-    openssl_pkcs12_read ( $pkcs12certdata, $certs, C('upay.SDK_SIGN_CERT_PWD') );
+    openssl_pkcs12_read ( $pkcs12certdata, $certs, UnPayConfig::SDK_SIGN_CERT_PWD );
     $x509data = $certs ['cert'];
     openssl_x509_read ( $x509data );
     $certdata = openssl_x509_parse ( $x509data );
@@ -109,11 +109,11 @@ function getCertIdByCerPath($cert_path) {
  */
 function getSignCertId() {
     // 签名证书路径
-    return getCertId ( C('upay.SDK_SIGN_CERT_PATH') );
+    return getCertId ( UnPayConfig::SDK_SIGN_CERT_PATH );
 }
 function getEncryptCertId() {
     // 签名证书路径
-    return getCertIdByCerPath ( C('upay.SDK_ENCRYPT_CERT_PATH') );
+    return getCertIdByCerPath ( UnPayConfig::SDK_ENCRYPT_CERT_PATH );
 }
 
 /**
@@ -131,7 +131,7 @@ function getPublicKey($cert_path) {
  */
 function getPrivateKey($cert_path) {
     $pkcs12 = file_get_contents ( $cert_path );
-    openssl_pkcs12_read ( $pkcs12, $certs, C('upay.SDK_SIGN_CERT_PWD') );
+    openssl_pkcs12_read ( $pkcs12, $certs, UnPayConfig::SDK_SIGN_CERT_PWD );
     return $certs ['pkey'];
 }
 
@@ -143,7 +143,7 @@ function getPrivateKey($cert_path) {
  * @return String
  */
 function encryptPan($pan) {
-    $cert_path = C('upay.MPI_ENCRYPT_CERT_PATH');
+    $cert_path = UnPayConfig::MPI_ENCRYPT_CERT_PATH;
     $public_key = getPublicKey ( $cert_path );
 
     openssl_public_encrypt ( $pan, $cryptPan, $public_key );
@@ -157,7 +157,7 @@ function encryptPan($pan) {
  * @return Ambigous <number, string>
  */
 function encryptPin($pan, $pwd) {
-    $cert_path = C('upay.SDK_ENCRYPT_CERT_PATH');
+    $cert_path = UnPayConfig::SDK_ENCRYPT_CERT_PATH;
     $public_key = getPublicKey ( $cert_path );
 
     return EncryptedPin ( $pwd, $pan, $public_key );
@@ -169,7 +169,7 @@ function encryptPin($pan, $pwd) {
  * @return unknown
  */
 function encryptCvn2($cvn2) {
-    $cert_path = C('upay.SDK_ENCRYPT_CERT_PATH');
+    $cert_path = UnPayConfig::SDK_ENCRYPT_CERT_PATH;
     $public_key = getPublicKey ( $cert_path );
 
     openssl_public_encrypt ( $cvn2, $crypted, $public_key );
@@ -183,7 +183,7 @@ function encryptCvn2($cvn2) {
  * @return unknown
  */
 function encryptDate($certDate) {
-    $cert_path = C('upay.SDK_ENCRYPT_CERT_PATH');
+    $cert_path = UnPayConfig::SDK_ENCRYPT_CERT_PATH;
     $public_key = getPublicKey ( $cert_path );
 
     openssl_public_encrypt ( $certDate, $crypted, $public_key );
@@ -198,7 +198,7 @@ function encryptDate($certDate) {
  * @return unknown
  */
 function encryptDateType($certDataType) {
-    $cert_path = C('upay.SDK_ENCRYPT_CERT_PATH');
+    $cert_path = UnPayConfig::SDK_ENCRYPT_CERT_PATH;
     $public_key = getPublicKey ( $cert_path );
 
     openssl_public_encrypt ( $certDataType, $crypted, $public_key );

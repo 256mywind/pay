@@ -3,8 +3,6 @@
 /**
  * js api回调通知类
  */
-require_once "lib/WxPay.Api.php";
-require_once 'lib/WxPay.Notify.php';
 
 class PayNotifyCallBack extends WxPayNotify
 {

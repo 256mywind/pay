@@ -1,7 +1,7 @@
 {
   "name": "256mywind/pay",
   "description": "Yii2 sms extension",
-  "keywords": ["yii2", "extension", "sms", "plugin"],
+  "keywords": ["yii2", "extension", "pay", "plugin"],
   "homepage": "https://github.com/256mywind/pay.git",
   "type": "yii2-extension",
   "license": "BSD 3-Clause",
