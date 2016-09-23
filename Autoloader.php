@@ -31,7 +31,7 @@ class Autoloader
             include $filename;
             return;
         }
-        $filename = __DIR__ . "/AliPay/" . $name . ".php";
+        $filename = __DIR__ . "/AliPay/lib/" . $name . ".php";
         if (is_file($filename)) {
             include $filename;
             return;

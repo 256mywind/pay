@@ -22,10 +22,10 @@ class JsPayConfig
 	 * 获取地址：https://mp.weixin.qq.com/advanced/advanced?action=dev&t=advanced/dev&token=2005451881&lang=zh_CN
 	 * @var string
 	 */
-	const APPID = '11';
-	const MCHID = '11';
-	const KEY = '11';
-	const APPSECRET = '11';
+	const APPID = '1';
+	const MCHID = '1';
+	const KEY = '1';
+	const APPSECRET = '1';
 	
 	//=======【证书路径设置】=====================================
 	/**
@@ -34,8 +34,8 @@ class JsPayConfig
 	 * API证书下载地址：https://pay.weixin.qq.com/index.php/account/api_cert，下载之前需要安装商户操作证书）
 	 * @var path
 	 */
-	const SSLCERT_PATH = '../cert/apiclient_cert.pem';
-	const SSLKEY_PATH = '../cert/apiclient_key.pem';
+	const SSLCERT_PATH = __DIR__.'/../WxPay/cert/apiclient_cert.pem';
+	const SSLKEY_PATH = __DIR__.'/../WxPay/cert/apiclient_key.pem';
 	
 	//=======【curl代理设置】===================================
 	/**

@@ -440,6 +440,39 @@ class WxPayApi
 		return $result;
 	}
 	
+	/**
+	 * 企业付款
+	 * @param WxPayTransfers $inputObj
+	 * @param number $timeOut
+	 * @throws WxPayException
+	 * @return 成功时返回，其他抛异常
+	 */
+	public static function transfers($inputObj, $timeOut = 6)
+	{
+	    $url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers';
+	    
+	    //检测必填参数
+	    if (!$inputObj->IsMch_appidSet()) {
+	        throw new WxPayException('请设置APPID');
+	    }
+	    if (!$inputObj->IsMchidSet()) {
+	        throw new WxPayException('请设置MCHID');
+	    }
+	    
+	    $inputObj->SetSpbill_create_ip($_SERVER['REMOTE_ADDR']);//终端ip
+	    $inputObj->SetNonce_str(self::getNonceStr());//随机字符串
+	    
+	    $inputObj->SetSign();//签名
+	    $xml = $inputObj->ToXml();
+	    
+	    $startTimeStamp = self::getMillisecond();//请求开始时间
+	    $response = self::postXmlCurl($xml, $url, true, $timeOut);
+	    $result = WxPayResults::Init($response);
+	    self::reportCostTime($url, $startTimeStamp, $result);//上报请求花费时间
+	    
+	    return $result;
+	}
+	
  	/**
  	 * 
  	 * 支付结果通用通知

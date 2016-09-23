@@ -33,19 +33,17 @@ class Pay
     function aliSdkPay($order_no, $total_fee = 0, $subject = '', $body = '', $notity_url = '')
     {
         header('Content-Type:text/html; charset=utf-8');
-        require_once __DIR__.'/AliPay/alipay_rsa.function.php';
-        require_once __DIR__.'/AliPay/alipay_core.function.php';
-                
-        $partner        = AliPayConfig::partner;
-        $seller_id      = AliPayConfig::seller_id;
+            
+        $partner        = AliPayConfig::config()['partner'];
+        $seller_id      = AliPayConfig::config()['seller_id'];
         $out_trade_no   = $order_no;
         $subject        = $subject ? $subject : '购物'; // String(128) 商品的标题/交易标题/订单标题/订单关键字等。
         $body           = $body ? $body : '购物'; // String(512) 对一笔交易的具体描述信息。如果是多种商品,请将商品描述字符串累加传给 body。
         $notify_url     = $notity_url; // 回调通知地址
         
-        $service = 'mobile.securitypay.pay';
+        $service = AliPayConfig::config()['service'];
         $payment_type = '1';
-        $_input_charset = AliPayConfig::input_charset;
+        $_input_charset = AliPayConfig::config()['input_charset'];
         $it_b_pay = '30m';
         $show_url = 'm.alipay.com';
         
@@ -63,13 +61,11 @@ class Pay
             'it_b_pay' => '"' . $it_b_pay . '"',
             'show_url' => '"' . $show_url . '"'
         );
-        
-        $prestr = createLinkstring($para_sort);
-        
+        $prestr = Core::instance()->createLinkstring($para_sort);
         $Sgin = false;
-        $sign_type = AliPayConfig::sign_type;
+        $sign_type = AliPayConfig::config()['sign_type'];
         if ($sign_type == 'RSA') {
-            $sign =  rsaSign($prestr, trim(AliPayConfig::private_key_path));
+            $sign = Rsa::instance()->rsaSign($prestr, AliPayConfig::config()['private_key']);
             return $prestr . '&sign="' . urlencode($sign) . '"' . '&sign_type="RSA"';
         }else {
             return $Sgin;
@@ -84,41 +80,19 @@ class Pay
      */
     function aliAppPay($order_no, $payprice, $subject = '', $body = '', $notity_url = '')
     {
-        // 支付宝支付的服务器端
-        $partner = AliPayConfig::partner;
-        $seller = AliPayConfig::seller_id;
-        // 坑，注意，需要转换密钥！！！ openssl pkcs8 -topk8 -inform PEM -in your.key -outform PEM -nocrypt > your_nocrypt.key
-        // $privateKey=file_get_contents("/ramdisk/your_nocrypt.key");//这里为了方便直接写入到php文件里了。
-        $privateKey = <<<EOF
------BEGIN PRIVATE KEY-----
-MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBANpqe7rC/qHB4lKg
-Kwitb53YkwJgIf3YhwOxD3vuvEkAu6ekcLJmqg9Il4dxXFMfAKRh38ExfsX7J3c4
-dB1jNLXyoI2kKtd0wFH99aQm5911TeDmIbbHMMF+GiEVWkOZFN7KiTUZcvAVE4nY
-hHsmmC0AQviWQMc4Lai67Jb3z2XxAgMBAAECgYAeDez8o/xZ0c4MxJFnXkYvmC+S
-chv7TCI39dNFoHI0MW+g/9WqFspr0/dV4dlsbqWt+PHLKb5iC89Abno72PzVk3JO
-ptyd6DZyq5sa/58ZwGJWbFSl4zaGisV28bactT6STTHiJczCzSSN7JP/amTERUA6
-jIXrzwIRJCxNyWsqgQJBAPSXv/qZBb/nAYrLp7dni3Lgw4WqSzs8wPdlWtQybdea
-PI+3EftrA+ByN352TLLCUGcX+1uhnncEOf1sPP+U9tkCQQDkmjPEnYzB9DNhHaYP
-Q6UzMZdeOMpsFycnRED4J7WgAIXZRouXycsbuV04clVVHWE5mdIAaeT+xEEzGU4r
-EmjZAkEAgODEw2KF6QvrgBq3EKh6jdlorLGCWoA0nSbGqTC5N/WJG6C21Ocab9U+
-8F+dIkPI4cl9JFcQjF2pwKKbsX/oYQJAMV8EUzBbl//voMfQd3d6lEXflR/ax+Fw
-OVDKX03kMfwq7DQKLewNC53K/kfjGhDQUKph6mj0Zflow2pxsWe2cQJBALMOVDQM
-hJ/5MRFqVevkvfQ5CgiFSv7G+5GWhpkZ91jyu6X2aKsOSGE7X+KeRglPsb4eHmF5
-yn9INyM6IS4gec4=
------END PRIVATE KEY-----
-EOF;
-        // 组装订单信息。可以让客户端传进来orderId等信息，这里连接数据库，查询价格，商品名等信息。ps：价格一定不要让客户端传进来,免得被骗:)
-        
+        //支付宝支付的服务器端
+        $partner = AliPayConfig::config()['partner'];
+        $seller  = AliPayConfig::config()['seller_id'];
         $subject    = $subject ? $subject : '华浩联创'; // String(128) 商品的标题/交易标题/订单标题/订单关键字等。
         $body       = $body ? $body : '购物'; // String(512) 对一笔交易的具体描述信息。如果是多种商品,请将商品描述字符串累加传给 body。
         $notifyurl  = $notity_url; // 回调通知地址
         
+        // 坑，注意，需要转换密钥！！！ openssl pkcs8 -topk8 -inform PEM -in your.key -outform PEM -nocrypt > your_nocrypt.key
+        // $privateKey=file_get_contents("/ramdisk/your_nocrypt.key");//这里为了方便直接写入到php文件里了。
         $dataString = sprintf('partner="%s"&seller_id="%s"&out_trade_no="%s"&subject="%s"&body="%s"&total_fee="%.2f"&notify_url="%s"&service="mobile.securitypay.pay"&payment_type="1"&_input_charset="utf-8"&it_b_pay="30m"&show_url="m.alipay.com"', $partner, $seller, $order_no, $subject, $body, $payprice, $notifyurl);
-        // 获取签名
-        $res = openssl_get_privatekey($privateKey);
-        openssl_sign($dataString, $sign, $res);
-        openssl_free_key($res);
-        $sign = urlencode(base64_encode($sign));
+        // 获取签名        
+        $sign = Rsa::instance()->rsaSign($dataString, AliPayConfig::config()['private_key']);
+        
         $dataString .= '&sign_type="RSA"&bizcontext="{"appkey":"2014052600006128"}"&sign="' . $sign . '"';
         // 生成可以直接打开的链接，让iOS客户端打开：[[UIApplication sharedApplication] openURL:[NSURL URLWithString:$iOSLink]];
         $iOSLink = "alipay://alipayclient/?" . urlencode(json_encode(array(
@@ -138,29 +112,47 @@ EOF;
      */
     function notifyurl()
     {
-        $config = [
-            'partner'             => AliPayConfig::partner,
-            'private_key_path'    => AliPayConfig::private_key_path,
-            'ali_public_key_path' => AliPayConfig::ali_public_key_path,
-            'sign_type'           => AliPayConfig::sign_type,
-            'input_charset'       => AliPayConfig::input_charset,
-            'cacert'              => AliPayConfig::cacert,
-            'transport'           => AliPayConfig::transport,
-            'seller_id'           => AliPayConfig::seller_id,
-        ];
-        $notify = new AlipayNotify($config);
-        if ($notify->verifyNotify()) { // 验证成功
-            $out_trade_no   = $_POST['out_trade_no']; // 商户订单号
-            $trade_no       = $_POST['trade_no']; // 支付宝交易号
-            $trade_status   = $_POST['trade_status']; // 交易状态
-            if ($_POST['trade_status'] == 'TRADE_FINISHED') {
-                
-            } else if ($_POST['trade_status'] == 'TRADE_SUCCESS') {
-                    // 更新状态
+        //计算得出通知验证结果
+        $alipay_config = AliPayConfig::config();
+        $alipayNotify  = new AlipayNotify($alipay_config);
+        if($alipayNotify->getResponse($_POST['notify_id']))//判断成功之后使用getResponse方法判断是否是支付宝发来的异步通知。
+        {
+            if($alipayNotify->getSignVeryfy($_POST, $_POST['sign'])) {//使用支付宝公钥验签
+                //——请根据您的业务逻辑来编写程序（以下代码仅作参考）——
+                //获取支付宝的通知返回参数，可参考技术文档中服务器异步通知参数列表
+                //商户订单号
+                $out_trade_no = $_POST['out_trade_no'];
+                //支付宝交易号
+                $trade_no = $_POST['trade_no'];
+                //交易状态
+                $trade_status = $_POST['trade_status'];
+                if($_POST['trade_status'] == 'TRADE_FINISHED') {
+                    //判断该笔订单是否在商户网站中已经做过处理
+                    //如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
+                    //如果有做过处理，不执行商户的业务程序
+                    //注意：
+                    //退款日期超过可退款期限后（如三个月可退款），支付宝系统发送该交易状态通知
+                    //请务必判断请求时的total_fee、seller_id与通知时获取的total_fee、seller_id为一致的
                 }
-            echo "success"; // 请不要修改或删除
-        } else {
-            echo "fail"; // 验证失败
+                else if ($_POST['trade_status'] == 'TRADE_SUCCESS') {
+                    //判断该笔订单是否在商户网站中已经做过处理
+                    //如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
+                    //如果有做过处理，不执行商户的业务程序
+                    //注意：
+                    //付款完成后，支付宝系统发送该交易状态通知
+                    //请务必判断请求时的total_fee、seller_id与通知时获取的total_fee、seller_id为一致的
+                }
+                //——请根据您的业务逻辑来编写程序（以上代码仅作参考）——
+                echo "success";		//请不要修改或删除
+            }
+            else //验证签名失败
+            {
+                echo "sign fail";
+            }
+        }
+        else //验证是否来自支付宝的通知失败
+        {
+            echo "response fail";
         }
     }
 
@@ -294,6 +286,7 @@ EOF;
         $input->SetOpenid($openid);
         
         $order = \WxPayApi::unifiedOrder($input);
+
         $data = array();
         if ($order["return_code"] == "FAIL") {
             // 商户自行增加处理流程
@@ -327,6 +320,69 @@ EOF;
         return $data;
     }
 
+    /**
+     * 企业付款
+     * @param unknown $order_no
+     * @param unknown $payprice
+     * @param string $subject
+     * @param string $body
+     * @param string $notity_url
+     * @param unknown $openid
+     */
+    public function transfers($order_no, $payprice, $body = '', $notity_url = '', $openid){
+         /**
+	     * API 参数
+	     * @var array
+	     * 'mch_appid'         # 公众号APPID
+	     * 'mchid'             # 商户号
+	     * 'device_info'       # 设备号
+	     * 'partner_trade_no'  # 商户订单号
+	     * 'openid'            # 收款用户openid
+	     * 'check_name'        # 校验用户姓名选项 针对实名认证的用户
+	     * 're_user_name'      # 收款用户姓名
+	     * 'amount'            # 付款金额
+	     * 'desc'              # 企业付款描述信息
+	     */
+        $input = new WxPayTransfers();
+        $input->SetMch_appid(JsPayConfig::APPID);
+        $input->SetMchid(JsPayConfig::MCHID);
+        $input->SetDevice_info('');
+        $input->SetPartner_trade_no($order_no);
+        $input->SetOpenid($openid);
+        $input->SetCheck_name('NO_CHECK');
+        //$input->SetRe_user_name('');
+        $input->SetAmount($payprice*100);
+        $input->SetDesc($body);
+        
+        $order = WxPayApi::transfers($input);
+        
+        $data = array();
+        if ($order["return_code"] == "FAIL") {
+            // 商户自行增加处理流程
+            // echo "通信出错：".$unifiedOrderResult['return_msg']."<br>";
+            $data['success'] = 0;
+            $data['out_trade_no'] = $order_no;
+            $data['err_code_des'] = $order['return_msg'];
+            
+        } elseif ($order["result_code"] == "FAIL") {
+            // 商户自行增加处理流程
+            // echo "错误代码：".$unifiedOrderResult['err_code']."<br>";
+            // echo "错误代码描述：".$unifiedOrderResult['err_code_des']."<br>";
+            $data['success'] = 0;
+            $data['out_trade_no'] = $order_no;
+            $data['err_code']     = $order['err_code'];
+            $data['err_code_des'] = $order['err_code_des'];
+            
+        } elseif ($order["result_code"] == "SUCCESS") {
+            // 商户自行增加处理流程
+            $data = $order;
+            $data['timestamp'] = time();            
+            $data['total_fee'] = $payprice;
+            $data['out_trade_no'] = $order_no;
+            $data['success'] = 1;
+        }
+        return $data;
+    }
     /**
      * 微信支付回调通知
      */
